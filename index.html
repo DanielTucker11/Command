@@ -108,6 +108,8 @@
 
       clickCount++;
 
+      console.log(`Canvas clicked: ${clickCount} times`);
+
       if (clickCount % 2 === 1) {
         // Odd clicks = intended location (red dot)
         locations = locations.filter(loc => loc.type !== "red");
@@ -122,6 +124,7 @@
 
       // Enable the submit button when both dots are on screen
       if (locations.length === 2) {
+        console.log("Both locations marked. Enabling Submit button.");
         document.getElementById("submitBtn").disabled = false;
       }
     });
@@ -152,16 +155,37 @@
         })),
       };
 
+      console.log("Submitting data:", data); // Debugging step: log the data to check
+
       // Replace this URL with the URL of your deployed Google Apps Script web app
-      const googleScriptURL = "YOUR_GOOGLE_SCRIPT_WEB_APP_URL";
+      const googleScriptURL = "https://script.google.com/macros/s/AKfycbyCuWHkSzGIUleDecYSqFfybrBdvh5WlU1FDbUwnpUFxVxOKCtGeCY64CVF1P46OcCpJA/exec";
 
-      const response = await fetch(googleScriptURL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      try {
+        const response = await fetch(googleScriptURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
 
-      if (response.ok) {
-        document.getElementById("submitMessage
+        if (response.ok) {
+          document.getElementById("submitMessage").style.display = "block"; // Show success message
+          setTimeout(() => {
+            document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
+          }, 3000);
+
+          locations = []; // Clear locations after submission
+          drawStrikeZone(); // Clear canvas after submission
+          document.getElementById("submitBtn").disabled = true; // Disable the submit button
+        } else {
+          alert("Error: Data submission failed.");
+        }
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        alert("Error: Unable to submit data. Please try again later.");
+      }
+    }
+  </script>
+</body>
+</html>

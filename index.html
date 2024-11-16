@@ -27,9 +27,23 @@
 </head>
 <body>
   <h1>Baseball Pitch Tool</h1>
+
+  <!-- Pitcher selection -->
+  <div class="control">
+    <label for="pitcherName">Select Pitcher:</label>
+    <select id="pitcherName">
+      <option value="Devin Glaze">Devin Glaze</option>
+      <option value="Glaze Thorenson">Glaze Thorenson</option>
+      <option value="Abel Garcia">Abel Garcia</option>
+      <option value="Bendy Straw">Bendy Straw</option>
+    </select>
+  </div>
+
   <div id="canvasContainer">
     <canvas id="strikeZone" width="300" height="400"></canvas>
   </div>
+
+  <!-- Pitch type selection -->
   <div class="control">
     <label for="pitchType">Pitch Type:</label>
     <select id="pitchType">
@@ -38,6 +52,8 @@
       <option value="Slider">Slider</option>
     </select>
   </div>
+
+  <!-- Submit button -->
   <button id="submitBtn" onclick="submitData()" disabled>Submit</button>
 
   <script>
@@ -109,6 +125,7 @@
     }
 
     async function submitData() {
+      const pitcherName = document.getElementById("pitcherName").value;
       const pitchType = document.getElementById("pitchType").value;
 
       if (locations.length !== 2) {
@@ -117,6 +134,7 @@
       }
 
       const data = {
+        pitcherName,
         pitchType,
         locations: locations.map(loc => ({
           x: loc.x,

@@ -157,34 +157,33 @@
 
       console.log("Submitting data:", data); // Debugging step: log the data to check
 
-      // Replace this URL with the URL of your deployed Google Apps Script web app
-      const googleScriptURL = "https://script.google.com/macros/s/AKfycbyCuWHkSzGIUleDecYSqFfybrBdvh5WlU1FDbUwnpUFxVxOKCtGeCY64CVF1P46OcCpJA/exec";
+      // Simulate sending data without an API
+      setTimeout(() => {
+        console.log("Data submission simulated.");
 
-      try {
-        const response = await fetch(googleScriptURL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+        // Show the relevant coordinates in the success message
+        const intendedLocation = locations.find(loc => loc.type === "red");
+        const actualLocation = locations.find(loc => loc.type === "green");
 
-        if (response.ok) {
-          document.getElementById("submitMessage").style.display = "block"; // Show success message
-          setTimeout(() => {
-            document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
-          }, 3000);
+        const successMessage = `
+          Data submitted successfully!<br>
+          Pitcher: ${pitcherName}<br>
+          Pitch Type: ${pitchType}<br>
+          Intended Location: (x: ${intendedLocation.x.toFixed(2)}, y: ${intendedLocation.y.toFixed(2)})<br>
+          Actual Location: (x: ${actualLocation.x.toFixed(2)}, y: ${actualLocation.y.toFixed(2)})
+        `;
 
-          locations = []; // Clear locations after submission
-          drawStrikeZone(); // Clear canvas after submission
-          document.getElementById("submitBtn").disabled = true; // Disable the submit button
-        } else {
-          alert("Error: Data submission failed.");
-        }
-      } catch (error) {
-        console.error("Error submitting data:", error);
-        alert("Error: Unable to submit data. Please try again later.");
-      }
+        document.getElementById("submitMessage").innerHTML = successMessage; // Display message with coordinates
+        document.getElementById("submitMessage").style.display = "block"; // Show success message
+        setTimeout(() => {
+          document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
+        }, 3000);
+
+        // Clear locations and reset canvas
+        locations = [];
+        drawStrikeZone();
+        document.getElementById("submitBtn").disabled = true; // Disable the submit button
+      }, 1000);
     }
   </script>
 </body>

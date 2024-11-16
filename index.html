@@ -157,33 +157,55 @@
 
       console.log("Submitting data:", data); // Debugging step: log the data to check
 
-      // Simulate sending data without an API
-      setTimeout(() => {
-        console.log("Data submission simulated.");
+      // Google Apps Script URL (replace with your actual script URL)
+      const googleScriptURL = "https://script.google.com/macros/s/AKfycbyCuWHkSzGIUleDecYSqFfybrBdvh5WlU1FDbUwnpUFxVxOKCtGeCY64CVF1P46OcCpJA/exec";
 
-        // Show the relevant coordinates in the success message
-        const intendedLocation = locations.find(loc => loc.type === "red");
-        const actualLocation = locations.find(loc => loc.type === "green");
+      try {
+        const response = await fetch(googleScriptURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
 
-        const successMessage = `
-          Data submitted successfully!<br>
-          Pitcher: ${pitcherName}<br>
-          Pitch Type: ${pitchType}<br>
-          Intended Location: (x: ${intendedLocation.x.toFixed(2)}, y: ${intendedLocation.y.toFixed(2)})<br>
-          Actual Location: (x: ${actualLocation.x.toFixed(2)}, y: ${actualLocation.y.toFixed(2)})
-        `;
+        // Check if response is okay
+        if (response.ok) {
+          const jsonResponse = await response.json();
+          console.log("Server response:", jsonResponse);
+          if (jsonResponse.status === 'success') {
+            // Show relevant coordinates in the success message
+            const intendedLocation = locations.find(loc => loc.type === "red");
+            const actualLocation = locations.find(loc => loc.type === "green");
 
-        document.getElementById("submitMessage").innerHTML = successMessage; // Display message with coordinates
-        document.getElementById("submitMessage").style.display = "block"; // Show success message
-        setTimeout(() => {
-          document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
-        }, 3000);
+            const successMessage = `
+              Data submitted successfully!<br>
+              Pitcher: ${pitcherName}<br>
+              Pitch Type: ${pitchType}<br>
+              Intended Location: (x: ${intendedLocation.x.toFixed(2)}, y: ${intendedLocation.y.toFixed(2)})<br>
+              Actual Location: (x: ${actualLocation.x.toFixed(2)}, y: ${actualLocation.y.toFixed(2)})
+            `;
 
-        // Clear locations and reset canvas
-        locations = [];
-        drawStrikeZone();
-        document.getElementById("submitBtn").disabled = true; // Disable the submit button
-      }, 1000);
+            document.getElementById("submitMessage").innerHTML = successMessage; // Display message with coordinates
+            document.getElementById("submitMessage").style.display = "block"; // Show success message
+            setTimeout(() => {
+              document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
+            }, 3000);
+
+            // Clear locations and reset canvas
+            locations = [];
+            drawStrikeZone();
+            document.getElementById("submitBtn").disabled = true; // Disable the submit button
+          } else {
+            alert("Error: " + jsonResponse.message);
+          }
+        } else {
+          alert("Error: Data submission failed with status " + response.status);
+        }
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        alert("Error: Unable to submit data. Please try again later.");
+      }
     }
   </script>
 </body>

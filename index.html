@@ -47,7 +47,11 @@
 
 <div id="click-area">
     <!-- Click area where dots will appear -->
-    <div class="scaled-rectangle"></div>
+    <div class="scaled-rectangle" style="
+        left: 137.5px; 
+        top: 150px; 
+        width: 42.5px; 
+        height: 125px;"></div>
 </div>
 
 <div class="form-section">
@@ -73,33 +77,17 @@
 </div>
 
 <script>
-    const clickArea = document.getElementById('click-area');
-    const scaledRectangle = document.querySelector('.scaled-rectangle');
-
-    const clickAreaWidth = clickArea.offsetWidth; // 300px
-    const clickAreaHeight = clickArea.offsetHeight; // 400px
-
-    // Scaling calculations
-    const rectangleWidth = (17 / 12) / 6 * clickAreaWidth; // (17/12 of width scale)
-    const rectangleHeight = (2.5 / 8) * clickAreaHeight; // (2.5 of height scale)
-    const rectangleLeft = ((-17 / 12 + 3) / 6) * clickAreaWidth; // Centered horizontally
-    const rectangleTop = ((7 - 4) / 8) * clickAreaHeight; // Centered vertically
-
-    // Apply styles
-    scaledRectangle.style.width = `${rectangleWidth}px`;
-    scaledRectangle.style.height = `${rectangleHeight}px`;
-    scaledRectangle.style.left = `${rectangleLeft}px`;
-    scaledRectangle.style.top = `${rectangleTop}px`;
-
     let clickCount = 0;
     let IntendedH = null;
     let IntendedV = null;
     let ActualH = null;
     let ActualV = null;
 
+    const clickArea = document.getElementById('click-area');
     const submitButton = document.getElementById('submit-button');
-    const scaleX = clickAreaWidth / 6; // Pixels per foot (width: -3 to 3)
-    const scaleY = clickAreaHeight / 8; // Pixels per foot (height: -1 to 7)
+
+    const scaleX = 300 / 6; // Pixels per foot (width: -3 to 3)
+    const scaleY = 400 / 8; // Pixels per foot (height: -1 to 7)
 
     clickArea.addEventListener('click', (event) => {
         const rect = clickArea.getBoundingClientRect();

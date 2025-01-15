@@ -1,212 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baseball Pitch Tool</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    #canvasContainer {
-      position: relative;
-      margin: 20px auto;
-      width: 300px;
-      height: 400px;
-      border: 2px solid black;
-    }
-    #strikeZone {
-      width: 100%;
-      height: 100%;
-    }
-    .control {
-      margin: 10px 0;
-    }
-    #submitMessage {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      color: green;
-      display: none; /* Initially hidden */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baseball Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #click-area {
+            width: 300px;
+            height: 400px;
+            border: 2px solid black;
+            margin-bottom: 20px;
+            position: relative;
+            background: linear-gradient(to bottom, rgba(200, 200, 200, 0.5) 0%, rgba(200, 200, 200, 0.5) 100%);
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+        .red-dot {
+            background-color: red;
+        }
+        .green-dot {
+            background-color: green;
+        }
+        .scaled-rectangle {
+            position: absolute;
+            background-color: rgba(0, 0, 255, 0.2);
+            border: 2px solid blue;
+            box-sizing: border-box;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Baseball Pitch Tool</h1>
 
-  <!-- Pitcher selection -->
-  <div class="control">
-    <label for="pitcherName">Select Pitcher:</label>
-    <select id="pitcherName">
-      <option value="Devin Glaze">Devin Glaze</option>
-      <option value="Glaze Thorenson">Glaze Thorenson</option>
-      <option value="Abel Garcia">Abel Garcia</option>
-      <option value="Bendy Straw">Bendy Straw</option>
+<h1>Baseball Tool</h1>
+
+<div id="click-area">
+    <!-- Click area where dots will appear -->
+    <div class="scaled-rectangle" style="left: 125px; top: 125px; width: 50px; height: 75px;"></div>
+</div>
+
+<div class="form-section">
+    <label for="pitcher">Pitcher:</label>
+    <select id="pitcher">
+        <option value="Devin Hayes">Devin Hayes</option>
+        <option value="Kevin Hayes">Kevin Hayes</option>
+        <option value="Devin Glaze">Devin Glaze</option>
     </select>
-  </div>
+</div>
 
-  <div id="canvasContainer">
-    <canvas id="strikeZone" width="300" height="400"></canvas>
-  </div>
-
-  <!-- Pitch type selection -->
-  <div class="control">
-    <label for="pitchType">Pitch Type:</label>
-    <select id="pitchType">
-      <option value="Fastball">Fastball</option>
-      <option value="Changeup">Changeup</option>
-      <option value="Slider">Slider</option>
+<div class="form-section">
+    <label for="pitch-type">Pitch Type:</label>
+    <select id="pitch-type">
+        <option value="FB">FB</option>
+        <option value="CH">CH</option>
+        <option value="SL">SL</option>
     </select>
-  </div>
+</div>
 
-  <!-- Submit button -->
-  <button id="submitBtn" onclick="submitData()" disabled>Submit</button>
+<div class="form-section">
+    <button id="submit-button">Submit</button>
+</div>
 
-  <!-- Success Message -->
-  <div id="submitMessage">Submitted successfully!</div>
+<script>
+    let clickCount = 0;
+    let IntendedH = null;
+    let IntendedV = null;
+    let ActualH = null;
+    let ActualV = null;
 
-  <script>
-    const canvas = document.getElementById("strikeZone");
-    const ctx = canvas.getContext("2d");
+    const clickArea = document.getElementById('click-area');
+    const submitButton = document.getElementById('submit-button');
 
-    const canvasWidth = 300; // Width of the canvas
-    const canvasHeight = 400; // Height of the canvas
+    const scaleX = 300 / 6; // Pixels per foot (width: -3 to 3)
+    const scaleY = 400 / 8; // Pixels per foot (height: -1 to 7)
 
-    // Strike zone dimensions in pixels (scaled from 17" x 30" dimensions)
-    const strikeZoneWidth = (17 / 12) * canvasWidth / 2; // ~42.5 pixels wide
-    const strikeZoneHeight = (30 / 12) * canvasHeight / 2; // ~100 pixels tall
+    clickArea.addEventListener('click', (event) => {
+        const rect = clickArea.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
 
-    const strikeZoneX = (canvasWidth - strikeZoneWidth) / 2; // Center horizontally
-    const strikeZoneY = (canvasHeight - strikeZoneHeight) / 2; // Center vertically
+        const scaledX = (x / scaleX) - 3;
+        const scaledY = 7 - (y / scaleY);
 
-    let locations = []; // To store intended and actual locations
-    let clickCount = 0; // To track how many clicks have been made
+        if (clickCount === 0) {
+            IntendedH = scaledX.toFixed(2);
+            IntendedV = scaledY.toFixed(2);
+            addDot(x, y, 'red-dot');
+        } else if (clickCount === 1) {
+            ActualH = scaledX.toFixed(2);
+            ActualV = scaledY.toFixed(2);
+            addDot(x, y, 'green-dot');
+        }
 
-    // Draw the initial strike zone
-    function drawStrikeZone() {
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear canvas
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(strikeZoneX, strikeZoneY, strikeZoneWidth, strikeZoneHeight);
-
-      // Redraw all existing markers (red for intended, green for actual)
-      for (let i = 0; i < locations.length; i++) {
-        const { x, y, type } = locations[i];
-        drawCircle(x, y, type);
-      }
-    }
-
-    // Call drawStrikeZone on page load
-    drawStrikeZone();
-
-    // Event listener for clicking the canvas
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      clickCount++;
-
-      console.log(`Canvas clicked: ${clickCount} times`);
-
-      if (clickCount % 2 === 1) {
-        // Odd clicks = intended location (red dot)
-        locations = locations.filter(loc => loc.type !== "red");
-        locations.push({ x, y, type: "red" });
-      } else {
-        // Even clicks = actual location (green dot)
-        locations = locations.filter(loc => loc.type !== "green");
-        locations.push({ x, y, type: "green" });
-      }
-
-      drawStrikeZone(); // Redraw the canvas with the new locations
-
-      // Enable the submit button when both dots are on screen
-      if (locations.length === 2) {
-        console.log("Both locations marked. Enabling Submit button.");
-        document.getElementById("submitBtn").disabled = false;
-      }
+        clickCount = Math.min(clickCount + 1, 2);
     });
 
-    function drawCircle(x, y, color) {
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
+    submitButton.addEventListener('click', () => {
+        const pitcher = document.getElementById('pitcher').value;
+        const pitchType = document.getElementById('pitch-type').value;
+        const googleSheetsURL = "https://script.google.com/macros/s/AKfycbzE1gyWBtGX43RaTEfenPGpcpeMAIkSW0jzs8pW8v7w7Lxf3gfnu4CHF-SXAZYd_9Xl9A/exec";
+        const date = new Date().toISOString();
 
-    async function submitData() {
-      const pitcherName = document.getElementById("pitcherName").value;
-      const pitchType = document.getElementById("pitchType").value;
+        if (IntendedH !== null && IntendedV !== null && ActualH !== null && ActualV !== null) {
+            const data = {
+                IntendedH,
+                IntendedV,
+                ActualH,
+                ActualV,
+                Pitcher: pitcher,
+                PitchType: pitchType,
+                Date: date
+            };
 
-      if (locations.length !== 2) {
-        alert("Please mark both the intended and actual locations.");
-        return;
-      }
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = googleSheetsURL;
 
-      const data = {
-        pitcherName,
-        pitchType,
-        locations: locations.map(loc => ({
-          x: loc.x,
-          y: loc.y,
-          type: loc.type,
-        })),
-      };
+            Object.keys(data).forEach(key => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = data[key];
+                form.appendChild(input);
+            });
 
-      console.log("Submitting data:", data); // Debugging step: log the data to check
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
 
-      // Google Apps Script URL (AKfycbyCuWHkSzGIUleDecYSqFfybrBdvh5WlU1FDbUwnpUFxVxOKCtGeCY64CVF1P46OcCpJA)
-      const googleScriptURL = "https://script.google.com/macros/s/AKfycbyCuWHkSzGIUleDecYSqFfybrBdvh5WlU1FDbUwnpUFxVxOKCtGeCY64CVF1P46OcCpJA/exec";
+            alert('Data submitted successfully!');
 
-      try {
-        const response = await fetch(googleScriptURL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
-        // Check if response is okay
-        if (response.ok) {
-          const jsonResponse = await response.json();
-          console.log("Server response:", jsonResponse);
-          if (jsonResponse.status === 'success') {
-            // Show relevant coordinates in the success message
-            const intendedLocation = locations.find(loc => loc.type === "red");
-            const actualLocation = locations.find(loc => loc.type === "green");
-
-            const successMessage = `
-              Data submitted successfully!<br>
-              Pitcher: ${pitcherName}<br>
-              Pitch Type: ${pitchType}<br>
-              Intended Location: (x: ${intendedLocation.x.toFixed(2)}, y: ${intendedLocation.y.toFixed(2)})<br>
-              Actual Location: (x: ${actualLocation.x.toFixed(2)}, y: ${actualLocation.y.toFixed(2)})
-            `;
-
-            document.getElementById("submitMessage").innerHTML = successMessage; // Display message with coordinates
-            document.getElementById("submitMessage").style.display = "block"; // Show success message
-            setTimeout(() => {
-              document.getElementById("submitMessage").style.display = "none"; // Hide the message after a few seconds
-            }, 3000);
-
-            // Clear locations and reset canvas
-            locations = [];
-            drawStrikeZone();
-            document.getElementById("submitBtn").disabled = true; // Disable the submit button
-          } else {
-            alert("Error: " + jsonResponse.message);
-          }
+            reset();
         } else {
-          alert("Error: Data submission failed with status " + response.status);
+            alert('Please complete all steps before submitting.');
         }
-      } catch (error) {
-        console.error("Error submitting data:", error);
-        alert("Error: Unable to submit data. Please try again later.");
-      }
+    });
+
+    function addDot(x, y, className) {
+        const dot = document.createElement('div');
+        dot.className = `dot ${className}`;
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
+        clickArea.appendChild(dot);
     }
-  </script>
+
+    function reset() {
+        clickCount = 0;
+        IntendedH = null;
+        IntendedV = null;
+        ActualH = null;
+        ActualV = null;
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach(dot => dot.remove());
+    }
+</script>
+
 </body>
 </html>

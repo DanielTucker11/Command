@@ -109,7 +109,7 @@
     submitButton.addEventListener('click', () => {
         const pitcher = document.getElementById('pitcher').value;
         const pitchType = document.getElementById('pitch-type').value;
-        const googleSheetsURL = "https://script.google.com/macros/s/AKfycbzE1gyWBtGX43RaTEfenPGpcpeMAIkSW0jzs8pW8v7w7Lxf3gfnu4CHF-SXAZYd_9Xl9A/exec";
+        const googleSheetsURL = "https://script.google.com/macros/s/AKfycby1mOKDCpFDFmNJT_PPo_3X-rm0QTasOb9KDldFTwuXkaQ5APK0PPRoqJeoENBmDGKL9g/exec";
         const date = new Date().toISOString();
 
         if (IntendedH !== null && IntendedV !== null && ActualH !== null && ActualV !== null) {
@@ -139,7 +139,7 @@
             form.submit();
             document.body.removeChild(form);
 
-            alert('Data submitted successfully!');
+            alert('Data submitted successfully! The form is now reset for new inputs.');
 
             reset();
         } else {

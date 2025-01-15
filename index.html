@@ -58,25 +58,45 @@
 <div class="form-section">
     <label for="pitcher">Pitcher:</label>
     <select id="pitcher">
-        <option value="Devin Hayes">Devin Hayes</option>
+        <option value="Guest">Guest</option>
         <option value="Rohan Agarwhal">Rohan Agarwhal</option>
         <option value="Charlie Berryman">Charlie Berryman</option>
         <option value="David Delgadillo">David Delgadillo</option>
-        <option value="Rohan Agarwhal">Rohan Agarwhal</option>
-        <option value="Charlie Berryman">Charlie Berryman</option>
+        <option value="Mike DiForte">Mike DiForte</option>
+        <option value="James Ellis">James Ellis</option>
+        <option value="Zach Frasher">Zach Frasher</option>
+        <option value="Caden Goodwin">Caden Goodwin</option>
+        <option value="Yash Jain">Yash Jain</option>
+        <option value="Hunter Lefkus">Hunter Lefkus</option>
+        <option value="Anthony Mancini">Anthony Mancini</option>
+        <option value="Cam Martindale">Cam Martindale</option>
+        <option value="Lance Mittelman">Lance Mittelman</option>
+        <option value="Marcus Monroe">Marcus Monroe</option>
+        <option value="Will Paxton">Will Paxton</option>
+        <option value="Scott Radinsky">Scott Radinsky</option>
+        <option value="Linden Reaburn">Linden Reaburn</option>
+        <option value="Ethan Rowland">Ethan Rowland</option>
+        <option value="Luke Schwartz">Luke Schwartz</option>
+        <option value="Kurt Thomas">Kurt Thomas</option>
+        <option value="Jackson Thorne">Jackson Thorne</option>
+        <option value="Zaine Toneske">Zaine Toneske</option>
+        <option value="John Wade">John Wade</option>
+        <option value="Logan Wenzel">Logan Wenzel</option>
+        <option value="Ben Williams">Ben Williams</option>
+        <option value="Brendon Wilson">Brendon Wilson</option>
     </select>
 </div>
 
 <div class="form-section">
     <label for="pitch-type">Pitch Type:</label>
     <select id="pitch-type">
-        <option value=Fourseam">Fourseam</option>
+        <option value="Fourseam">Fourseam</option>
         <option value="Sinker">Sinker</option>
         <option value="Curveball">Curveball</option>
-        <option value=Slider">Slider</option>
+        <option value="Slider">Slider</option>
         <option value="Changeup">Changeup</option>
         <option value="Splitter">Splitter</option>
-        <option value=Cutter">Cutter</option>
+        <option value="Cutter">Cutter</option>
         <option value="Sweeper">Sweeper</option>
         <option value="KickChange">KickChange</option>
     </select>
@@ -92,6 +112,8 @@
     let IntendedV = null;
     let ActualH = null;
     let ActualV = null;
+    let redDot = null;
+    let greenDot = null;
 
     const clickArea = document.getElementById('click-area');
     const submitButton = document.getElementById('submit-button');
@@ -110,14 +132,24 @@
         if (clickCount === 0) {
             IntendedH = scaledX.toFixed(2);
             IntendedV = scaledY.toFixed(2);
-            addDot(x, y, 'red-dot');
+            if (!redDot) {
+                redDot = createDot(x, y, 'red-dot');
+                clickArea.appendChild(redDot);
+            } else {
+                moveDot(redDot, x, y);
+            }
         } else if (clickCount === 1) {
             ActualH = scaledX.toFixed(2);
             ActualV = scaledY.toFixed(2);
-            addDot(x, y, 'green-dot');
+            if (!greenDot) {
+                greenDot = createDot(x, y, 'green-dot');
+                clickArea.appendChild(greenDot);
+            } else {
+                moveDot(greenDot, x, y);
+            }
         }
 
-        clickCount = Math.min(clickCount + 1, 2);
+        clickCount = (clickCount + 1) % 2;
     });
 
     submitButton.addEventListener('click', () => {
@@ -153,20 +185,23 @@
             form.submit();
             document.body.removeChild(form);
 
-            alert('Data submitted successfully! The form is now reset for new inputs.');
-
             reset();
         } else {
             alert('Please complete all steps before submitting.');
         }
     });
 
-    function addDot(x, y, className) {
+    function createDot(x, y, className) {
         const dot = document.createElement('div');
         dot.className = `dot ${className}`;
         dot.style.left = `${x}px`;
         dot.style.top = `${y}px`;
-        clickArea.appendChild(dot);
+        return dot;
+    }
+
+    function moveDot(dot, x, y) {
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
     }
 
     function reset() {
@@ -175,8 +210,14 @@
         IntendedV = null;
         ActualH = null;
         ActualV = null;
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach(dot => dot.remove());
+        if (redDot) {
+            redDot.remove();
+            redDot = null;
+        }
+        if (greenDot) {
+            greenDot.remove();
+            greenDot = null;
+        }
     }
 </script>
 
